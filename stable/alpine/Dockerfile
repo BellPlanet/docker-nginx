@@ -49,6 +49,8 @@ RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
 		--with-compat \
 		--with-file-aio \
 		--with-http_v2_module \
+		--add-module=/usr/src/ngx_devel_kit-0.3.0 \
+		--add-module=/usr/src/lua-nginx-module-0.10.13 \
 	" \
 	&& addgroup -S nginx \
 	&& adduser -D -S -h /var/cache/nginx -s /sbin/nologin -G nginx nginx \
@@ -63,6 +65,7 @@ RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
 		curl \
 		gnupg \
 		libxslt-dev \
+		lua-dev \
 		gd-dev \
 		geoip-dev \
 	&& curl -fSL https://nginx.org/download/nginx-$NGINX_VERSION.tar.gz -o nginx.tar.gz \
@@ -70,7 +73,7 @@ RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
 	&& export GNUPGHOME="$(mktemp -d)" \
 	&& found=''; \
 	for server in \
-		ha.pool.sks-keyservers.net \
+		ha.pool.sks-keyservers.net \\
 		hkp://keyserver.ubuntu.com:80 \
 		hkp://p80.pool.sks-keyservers.net:80 \
 		pgp.mit.edu \
@@ -85,6 +88,10 @@ RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
 	&& tar -zxC /usr/src -f nginx.tar.gz \
 	&& rm nginx.tar.gz \
 	&& cd /usr/src/nginx-$NGINX_VERSION \
+	&& curl -fSL https://codeload.github.com/openresty/lua-nginx-module/tar.gz/v0.10.13 -o lua-nginx-module.tar.gz \
+	&& tar -zxC /usr/src -f lua-nginx-module.tar.gz \
+	&& curl -fSL https://codeload.github.com/simplresty/ngx_devel_kit/tar.gz/v0.3.0 -o ngx_devel_kit.tar.gz \
+	&& tar -zxC /usr/src -f ngx_devel_kit.tar.gz \
 	&& ./configure $CONFIG --with-debug \
 	&& make -j$(getconf _NPROCESSORS_ONLN) \
 	&& mv objs/nginx objs/nginx-debug \
